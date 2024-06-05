@@ -72,9 +72,9 @@ def process_movie(old_path, final_path):
         elif old_path.endswith('.mp4'):
             # 如果final_path和old_path不是同一个目录时，可以直接复制文件进行重定向
             if old_path != final_path:
-                shutil.move(old_path, final_path) # windows
-                # command = ['mv', old_path, final_path] # linux
-                # subprocess.run(command, check=True)
+                # shutil.move(old_path, final_path) # windows
+                command = ['mv', old_path, final_path] # linux
+                subprocess.run(command, check=True)
             else: 
                 # 同一个目录时直接返回
                 vr = decord.VideoReader(old_path)
@@ -101,7 +101,7 @@ def process_movie(old_path, final_path):
         print(f"Error while processing {old_path}: {e}")
         return old_path, None
 
-    print(f"Finished processing {final_path}. Duration: {duration}")
+    print(f"Finished processing {final_path}. Duration of videos: {duration}")
     return final_path, duration
 
 def rename_folder_to_uuid(folder_path):

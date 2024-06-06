@@ -36,11 +36,28 @@ def get_video_dimensions(path):
     except Exception as e:
         print(f"Error getting dimensions for {path}: {e}")
         return None, None
+    
+# 获取视频编码格式
+def get_video_codec(path):
+    try:
+        result = subprocess.run(
+            ['ffprobe', '-hide_banner', '-loglevel', 'error', '-select_streams', 'v:0',
+             '-show_entries', 'stream=codec_name', '-of', 'csv=p=0', path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+        codec = result.stdout.strip()
+        return codec
+    except Exception as e:
+        print(f"Error getting codec for {path}: {e}")
+        return None
 
 def process_movie(old_path, final_path):
     print(f"Processing {old_path}")
     try:
         w, h = get_video_dimensions(old_path)
+        codec = get_video_codec(old_path)
         if w is None or h is None:
             os.remove(old_path)
             return old_path, None
@@ -82,7 +99,7 @@ def process_movie(old_path, final_path):
                 duration = len(vr) / fps
                 print(f"Skipped processing {old_path}. Duration: {duration}")
                 return old_path, duration
-        elif(old_path.endswith('.rmvb')):
+        elif(old_path.endswith('.rmvb')) or codec == 'rv40' or codec == 'rv30' :
             command = [
                 'ffmpeg', '-i', old_path, '-c:v', 'libx264', '-preset', 'fast', '-crf', '20', '-an', '-sn', final_path, '-y'
             ]

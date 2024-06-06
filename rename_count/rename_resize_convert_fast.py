@@ -1,5 +1,5 @@
 # 重命名所有文件夹为uuid，重命名所有文件为uuid
-# 将所有视频文件转换为mp4格式，4K、2K等视频分辨率调整为1080p，视频质量调整为CRF 23，视频编码速度调整为fast，删除原视频文件
+# 将所有视频文件转换为mp4格式，4K、2K等视频分辨率调整为1080p，视频质量调整为CRF 20，视频编码速度调整为fast，删除原视频文件
 # 生成info.json文件记录时长和错误信息
 
 # python -p path/to/save -o path/to/output -n bbc05 > bbc05.rename.log 2>&1
@@ -64,7 +64,7 @@ def process_movie(old_path, final_path):
             # '-threads', '4'（可选）：指定使用 4 个线程（根据你的 CPU 核心数量调整）。可以增加编码速度。
             command = [
                 'ffmpeg', '-i', old_path, '-vf', scale_filter, '-sn', '-c:v', 'libx264',
-                '-preset', 'fast', '-crf', '23', '-an', final_path, '-y'
+                '-preset', 'fast', '-crf', '20', '-an', final_path, '-y'
             ]
             subprocess.run(command, check=True)
 
@@ -82,10 +82,15 @@ def process_movie(old_path, final_path):
                 duration = len(vr) / fps
                 print(f"Skipped processing {old_path}. Duration: {duration}")
                 return old_path, duration
+        elif(old_path.endswith('.rmvb')):
+            command = [
+                'ffmpeg', '-i', old_path, '-c:v', 'libx264', '-preset', 'fast', '-crf', '20', '-an', '-sn', final_path, '-y'
+            ]
+            subprocess.run(command, check=True)
         else:
             # 不需要resize的其他视频文件，直接转换成mp4格式
             command = [
-                'ffmpeg', '-i', old_path, '-c', 'copy', '-y', final_path
+                'ffmpeg', '-i', old_path, '-map', '0:v', '-c', 'copy', '-y', final_path
             ]
             subprocess.run(command, check=True)
 
@@ -119,6 +124,7 @@ def rename_all_folders(folder_path):
             print(f"Renamed folder {old_dir_path} to {new_dir_path}")
 
 def process_folder(folder_path, output_path=None, info_json_name='default'):
+    os.makedirs(output_path, exist_ok=True)
     error_list = []
     start_time = time.time()
 

@@ -95,6 +95,7 @@ def process_video_segment(num_gpus, output, cutscene_threshold, eventcut_thresho
         return
 
 def main(path, output, video_list_base_path='video_list', num_gpus=8, cutscene_threshold=25, eventcut_threshold=0.6):
+    os.makedirs(output, exist_ok=True)
     # 记录开始时间
     start_time = time.time()
     
